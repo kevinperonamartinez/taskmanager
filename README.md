@@ -35,5 +35,5 @@ https://taskmanager-eight-navy.vercel.app/
 
 ---
 
-## **Estructura del Proyecto**
+
 
