@@ -3,46 +3,36 @@ import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import "./index.css";
 
-const API_URL = "http://localhost:5000/tasks";
-
 function App() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem("tasks");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setTasks(data));
-  }, []);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
-  const addTask = async (text, date) => {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, date })
-    });
-    const newTask = await res.json();
-    setTasks([...tasks, newTask]);
+  const addTask = (text, date) => {
+  setTasks([...tasks, { id: Date.now(), text, date, completed: false }]);
+};
+
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
   };
 
-  const deleteTask = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    setTasks(tasks.filter(task => task.id !== id));
-  };
-
-  const toggleTask = async (id) => {
-    const task = tasks.find(t => t.id === id);
-    const updatedTask = { ...task, completed: !task.completed };
-    await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedTask)
-    });
-    setTasks(tasks.map(t => t.id === id ? updatedTask : t));
+  const toggleTask = (id) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
   };
 
   return (
     <div className="container">
-      <h1>TaskMaster</h1>
+      <h1>Tu Gestor de Tareas </h1>
       <TaskForm addTask={addTask} />
       <TaskList tasks={tasks} deleteTask={deleteTask} toggleTask={toggleTask} />
     </div>
